@@ -1,5 +1,5 @@
 import ffmpeg
-from Logo import Logo
+from src.Logo import Logo
 
 class Video():
   width = 0
@@ -15,7 +15,7 @@ class Video():
     self.stream = ffmpeg.input(filename)
 
   def output(self, filename):
-    self.stream = ffmpeg.output(self.stream, 'out.mp4')
+    self.stream = ffmpeg.output(self.stream, filename)
     ffmpeg.run(self.stream, overwrite_output=True)
 
   def addLogo(self, filename, position, scale):

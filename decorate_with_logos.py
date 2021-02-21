@@ -1,5 +1,5 @@
 #!/usr/bin/python
-from src.Video import Video
+from Video import Video
 
 video = Video('data/video.mp4')
 

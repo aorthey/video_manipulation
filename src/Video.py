@@ -18,6 +18,24 @@ class Video():
     self.stream = ffmpeg.output(self.stream, filename)
     ffmpeg.run(self.stream, overwrite_output=True)
 
+  def addAudio(self, filename, duration=-1):
+    input_audio = ffmpeg.input(filename)
+    if duration > 0:
+      input_audio = input_audio.filter('atrim',duration=duration)
+    self.stream = ffmpeg.concat(self.stream, input_audio, v=1, a=1)
+
+  def addTitleScreen(self, filename, duration):
+    input_still = ffmpeg.input(filename)
+    input_still = ffmpeg.filter(input_still, 'scale', self.width, self.height)
+    tmp_stream = self.stream.trim(start=0,end=duration)
+    input_still = ffmpeg.filter([tmp_stream, input_still], 'overlay')
+
+    # input_audio = ffmpeg.input("sounds/angelic-swell.wav")
+    # input_audio = input_audio.filter('atrim',duration=duration)
+    # input_still = ffmpeg.concat(input_still, input_audio, v=1, a=1)
+
+    self.stream = ffmpeg.concat(input_still, self.stream)
+
   def addLogo(self, filename, position, scale):
     logo = Logo(filename)
     logo.setTotalWidthHeight(self.width, self.height)

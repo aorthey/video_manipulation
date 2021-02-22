@@ -36,9 +36,17 @@ class Video():
 
     self.stream = ffmpeg.concat(input_still, self.stream)
 
-  def addLogo(self, filename, position, scale):
+  def addLogo(self, filename, position, scale, duration = -1):
     logo = Logo(filename)
     logo.setTotalWidthHeight(self.width, self.height)
     logo.scale(scale)
     [x,y] = logo.getPosition(position)
-    self.stream = ffmpeg.filter([self.stream, logo.asStream()], 'overlay', x, y)
+
+    if duration > 0:
+      self.stream = ffmpeg.filter_([self.stream, logo.asStream()], \
+          'overlay', x=x, y=y, enable='between(t,0,%d)'%duration)
+    else:
+      self.stream = ffmpeg.filter([self.stream, logo.asStream()], \
+          'overlay', x, y)
+    # self.stream = ffmpeg.overlay(self.stream, logo.asStream(), x=x, y=y, eof_action='pass')
+

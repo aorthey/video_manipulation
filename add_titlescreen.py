@@ -1,13 +1,14 @@
 #!/usr/bin/python
 from src.Video import Video
 
-video = Video('data/video.mp4')
-
 durationTitleScreen = 8
 scaleLogos = 0.15
 
+video = Video('data/video.mp4')
+
 video.addTitleScreen("logos/introscreen.png", duration=durationTitleScreen)
-video.addAudio("sounds/angelic-swell.wav", duration=durationTitleScreen)
+video.addAudio("sounds/angelic-swell.wav", duration=8)
+
 video.stream = video.stream.trim(duration=durationTitleScreen + 6)
 
 video.addLogo("logos/tub.png", position= "BOTTOM_LEFT", \

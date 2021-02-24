@@ -43,6 +43,12 @@ class Logo():
     elif position is "BOTTOM_MIDDLE":
       x = 0.5*self.total_width-0.5*self.width
       y = self.total_height-self.height-self.padding
+    elif position is "BOTTOM_RIGHT_MIDDLE":
+      x = 0.66*self.total_width
+      y = self.total_height-self.height-self.padding
+    elif position is "BOTTOM_LEFT_MIDDLE":
+      x = 0.33*self.total_width
+      y = self.total_height-self.height-self.padding
     elif position is "TOP_RIGHT":
       x = self.total_width-self.width-self.padding
       y = self.padding

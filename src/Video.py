@@ -27,11 +27,12 @@ class Video():
       self.framerate = int(float(n[0]/n[1]))
       print("Input file %s [%dx%d] %d frames and framerate %d."%(filename, \
           self.width, self.height, self.num_frames, self.framerate))
-      if duration > 0:
+      if duration >= 0:
         self.stream = ffmpeg.input(filename,ss=ss,t=duration)
         self.duration = duration
       else:
         self.stream = ffmpeg.input(filename,ss=ss)
+      self.audio_stream = self.stream['a']
 
   def output(self, filename):
     if self.audio_stream is not None:
@@ -39,6 +40,7 @@ class Video():
           **{'b:a': '320k', 'c:a': 'libmp3lame'})
     else:
       self.stream = ffmpeg.output(self.stream, filename, crf='30')
+      # self.stream = ffmpeg.output(self.stream.audio, self.stream, filename, crf='30')
 
     ffmpeg.run(self.stream, overwrite_output=True)
 
@@ -94,44 +96,68 @@ class Video():
     # print(video.num_frames, self.num_frames)
     # sys.exit(0)
     self.stream = ffmpeg.concat(self.stream, video.stream)
+    # self.audio_stream = ffmpeg.concat(self.audio_stream, video.audio_stream)
     self.duration += video.duration
 
-  def addText(self, text, x=0, y=0, tStart=0, tEnd=-1):
+  def addText(self, text, position="BOTTOM_MIDDLE", fontcolor="white",
+      boxcolor="#AFAFAF", tStart=0, tEnd=-1):
     if tEnd < 0:
       tEnd = self.duration
 
     lines = text.split('\n')
 
     for lc, line in enumerate(lines):
-      # print(lc,line)
       yoffset = (len(lines)-lc)
-    # [in]drawtext=font='Arial': text='This is text line
-    # 1':x=(w-tw)/2:y=((h-text_h)/2)-(text_h-(th/4)): fontsize=55:
-    #   fontcolor=red, drawtext=font='Arial': text='This is text line
-    #   2':x=(w-tw)/2:y=((h-text_h)/2)+(text_h-(th/4)): fontsize=55:
-    #     fontcolor=green[out]
-
 
       padding=0.05*self.height
       padding_w=0.05*self.width
 
+      if position is "BOTTOM_LEFT":
+        x="%f"%(padding_w)
+      elif position is "BOTTOM_RIGHT":
+        x="%f-text_w-%f"%(self.width, padding_w)
+      elif position is "BOTTOM_MIDDLE":
+        x="%f-text_w/2"%(0.5*self.width)
+
+      y="%f-%d*(text_h+%f)"%(self.height, yoffset, padding)
+
+      fonttype = "/usr/share/fonts/truetype/cmr10.ttf"
+      self.stream = ffmpeg.filter_(self.stream, 'drawtext', \
+          fontfile=fonttype, text=line, fontcolor=fontcolor,\
+          x=x, y=y,\
+          enable='between(t,%d,%d)'%(tStart, tEnd),\
+          fontsize=80, box=1, \
+          boxcolor=boxcolor, boxborderw=0.5*padding)
+
+  def addSpecialText(self, text, tStart=0, tEnd=-1):
+    if tEnd < 0:
+      tEnd = self.duration
+
+    lines = text.split('\n')
+
+    self.stream = ffmpeg.filter_(self.stream, 'drawbox', \
+        color='black@0.4',\
+        y=0.8*self.height,\
+        enable='between(t,%d,%d)'%(tStart, tEnd),\
+        width=self.width,\
+        height=0.15*self.height,\
+        t='fill')
+
+    for lc, line in enumerate(lines):
+      yoffset = (len(lines)-lc)
+
+      padding_w=0.03*self.width
+
+      x="%f"%(padding_w)
+
+      y="%f-0.5*text_h"%(0.875*self.height)
+
       fonttype = "/usr/share/fonts/truetype/cmr10.ttf"
       self.stream = ffmpeg.filter_(self.stream, 'drawtext', \
           fontfile=fonttype, text=line, fontcolor='white',\
-          x="%f-text_w/2"%(0.5*self.width), \
-          y="%f-%d*(text_h+%f)"%(self.height, yoffset, padding), \
+          x=x, y=y,\
           enable='between(t,%d,%d)'%(tStart, tEnd),\
-          fontsize=80, box=1, boxcolor="#AFAFAF", boxborderw=0.5*padding)
-
-        # os.system("""ffmpeg -i merola.mp4 -vf
-        #     drawtext="fontfile=/path/to/font.ttf: \
-        #             text={text}: fontcolor=white: fontsize=24: box=1:
-        #             boxcolor=black@0.5: \
-        #                     boxborderw=5: x=0: y=h-30" -codec:a copy
-        #                     output.mp4""")
-
-
-
+          fontsize=80)
 
   def addLogos(self, filenames, scale, duration = -1):
     logos = []

@@ -63,6 +63,7 @@ class Video():
   def addTitleScreen(self, filename, duration):
     input_still = ffmpeg.input(filename, r=self.framerate)
     input_still = ffmpeg.filter(input_still, 'scale', self.width, self.height)
+    input_still = ffmpeg.filter_(input_still, 'setsar', '1/1')
 
     input_still = ffmpeg.filter_(input_still, 'tpad',\
         stop_mode='clone', stop_duration=duration)

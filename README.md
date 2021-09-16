@@ -1,4 +1,4 @@
-Python library based upon ffmpeg-python (https://github.com/kkroening/ffmpeg-python) for easy creation and manipualtion of videos using scripting.
+Python library based upon ffmpeg-python (https://github.com/kkroening/ffmpeg-python) for easy creation and manipulation of videos using scripting.
 
 # Features
 
